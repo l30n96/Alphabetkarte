@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortampel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            border: 1px solid #000;
+        }
+        
+        th {
+            background-color: lightgray;
+        }
+        
+        .green {
+            background-color: lightgreen;
+        }
+        
+        .yellow {
+            background-color: yellow;
+        }
+        
+        .red {
+            background-color: tomato;
+        }
+        
+        #wordList {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        #wordInput {
+            width: 200px;
+            margin: 10px auto;
+            padding: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wortampel</h1>
+    <table>
+        <tr>
+            <th class="green" colspan="3">Grün</th>
+        </tr>
+        <tr>
+            <td id="1">1<br>neues Wort</td>
+            <td id="2">2<br>abc</td>
+            <td id="3">3<br>def</td>
+        </tr>
+        <tr>
+            <th class="yellow" colspan="3">Gelb</th>
+        </tr>
+        <tr>
+            <td id="4">4<br>ghi</td>
+            <td id="5">5<br>jkl</td>
+            <td id="6">6<br>mno</td>
+        </tr>
+        <tr>
+            <th class="red" colspan="3">Rot</th>
+        </tr>
+        <tr>
+            <td id="7">7<br>pqrs</td>
+            <td id="8">8<br>tuv</td>
+            <td id="9">9<br>wxyz</td>
+        </tr>
+    </table>
+    <input type="text" id="wordInput" readonly>
+    <div id="wordList"></div>
+
+    <script>
+        const wordList = [
+            "Apfel", "Banane", "Champagner", "Delfin", "Elefant",
+            "Fuchs", "Giraffe", "Hund", "Igel", "Jagd", "Känguru",
+            "Löwe", "Mango", "Nilpferd", "Orange", "Papagei",
+            "Qualle", "Robbe", "Schlange", "Tiger", "Uhr", "Vogel",
+            "Wal", "Xenon", "Yacht", "Zebra", "Äpfel", "Bär",
+            "Cola", "Drache", "Esel", "Flamingo", "Gorilla", "Hase",
+            "Igel", "Jaguar", "Krokodil", "Lamm", "Maus", "Nashorn",
+            "Ochse", "Pferd", "Quokka", "Ratte", "Schaf", "Taube",
+            "Uhu", "Vampir", "Wolf", "Xylofon", "Yeti", "Ziege"
+        ];
+
+        const wordInput = document.getElementById('wordInput');
+        const wordListDiv = document.getElementById('wordList');
+        let typedWord = '';
+        let lastClicked = '';
+        let clickCount = 0;
+        let clickTimeout;
+        let lastClickedTime = 0;
+
+        function updateWordList(selectedNumber) {
+            const currentTime = new Date().getTime();
+            clearTimeout(clickTimeout);
+
+            if (selectedNumber === '1') {
+                typedWord = '';
+            } else {
+                clickCount++;
+                const selectedLetter = getSelectedLetters(selectedNumber, clickCount);
+                if (lastClicked !== selectedNumber || currentTime - lastClickedTime > 2000) {
+                    typedWord += selectedLetter;
+                    lastClicked = selectedNumber;
+                    lastClickedTime = currentTime;
+                    clickCount = 0;
+                } else {
+                    typedWord = typedWord.slice(0, -1) + selectedLetter;
+                }
+            }
+
+            wordInput.value = typedWord;
+
+            const filteredWords = wordList.filter(word => {
+                const firstLetters = word.toLowerCase().slice(0, typedWord.length);
+                return firstLetters === typedWord.toLowerCase();
+            });
+
+            const topWords = getTopWords(filteredWords);
+            displayWordList(topWords);
+
+            clickTimeout = setTimeout(() => {
+                clickCount = 0;
+                lastClicked = '';
+            }, 2000);
+        }
+
+        function getSelectedLetters(selectedNumber, clickCount) {
+            switch (selectedNumber) {
+                case '1':
+                    return '';
+                case '2':
+                    return getRepeatedLetter('abc', clickCount);
+                case '3':
+                    return getRepeatedLetter('def', clickCount);
+                case '4':
+                    return getRepeatedLetter('ghi', clickCount);
+                case '5':
+                    return getRepeatedLetter('jkl', clickCount);
+                case '6':
+                    return getRepeatedLetter('mno', clickCount);
+                case '7':
+                    return getRepeatedLetter('pqrs', clickCount);
+                case '8':
+                    return getRepeatedLetter('tuv', clickCount);
+                case '9':
+                    return getRepeatedLetter('wxyz', clickCount);
+                default:
+                    return '';
+            }
+        }
+
+        function getRepeatedLetter(letters, clickCount) {
+            const index = (clickCount - 1) % letters.length;
+            return letters[index];
+        }
+
+        function getTopWords(filteredWords) {
+            // Implement your logic to get top words based on frequency or relevance
+            // For now, returning the first 5 words
+            return filteredWords.slice(0, 5);
+        }
+
+        function displayWordList(topWords) {
+            wordListDiv.innerHTML = '';
+            const ul = document.createElement('ul');
+            topWords.forEach(word => {
+                const li = document.createElement('li');
+                li.textContent = word;
+                ul.appendChild(li);
+            });
+            wordListDiv.appendChild(ul);
+        }
+
+        document.querySelectorAll('td').forEach(td => {
+            td.addEventListener('click', function() {
+                const selectedNumber = this.id;
+                updateWordList(selectedNumber);
+            });
+        });
+    </script>
+</body>
+</html>
